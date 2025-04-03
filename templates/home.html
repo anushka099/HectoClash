@@ -1,14 +1,24 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form method="POST">
-    <div class="container text-center mt-5">
-        <h3>Choose an Option</h3>
+<div class="container text-center mt-5">
+    <h3>Join or Create a Game</h3>
+    <form method="POST">
         <div class="mt-4">
-            <input type="text" placeholder="pick a name!" name="name"/>
-            <button type="submit" name="play" value="true" class="btn btn-success btn-lg">Play</button>
-            <button type="submit" name="spectate" value="true" class="btn btn-primary btn-lg">Spectate</button>
+            <input type="text" class="form-control" placeholder="Enter your name" name="name" required />
         </div>
-    </div>
-</form>
+        <div class="mt-3">
+            <input type="text" class="form-control" placeholder="Enter room code (if joining)" name="code"/>
+        </div>
+        <div class="mt-4">
+            <button type="submit" name="play" value="true" class="btn btn-success btn-lg">Quick Play</button>
+            <button type="submit" name="join" value="true" class="btn btn-primary btn-lg">Join Room</button>
+            <button type="submit" name="create" value="true" class="btn btn-warning btn-lg">Create Room</button>
+        </div>
+    </form>
+
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+</div>
 {% endblock %}
