@@ -1,7 +1,60 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+</head>
+<body>
+    <h2>Room Code: {{ code }}</h2>
 
-{% block content %}
-<div class="container text-center mt-5">
-    <h1>Room Code: {{ code }}</h1>
-</div>
-{% endblock %}
+    <h3>Players:</h3>
+    <ul id="players-list">
+        {% for player in players %}
+            <li>{{ player }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Game Status:</h3>
+    <p id="timer">Waiting for players...</p>
+    <h2 id="message"></h2>
+
+    <h3>Chat:</h3>
+    <div id="chat-box"></div>
+    <input type="text" id="chat-message" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var socket = io();
+
+        socket.on("update_players", function(data) {
+            var playersList = document.getElementById("players-list");
+            playersList.innerHTML = "";
+            data.players.forEach(player => {
+                playersList.innerHTML += `<li>${player}</li>`;
+            });
+        });
+
+        socket.on("update_timer", function(data) {
+            document.getElementById("timer").innerText = "Game starts in: " + data.time + "s";
+        });
+
+        socket.on("game_start", function(data) {
+            document.getElementById("timer").innerText = "Game Started!";
+            document.getElementById("message").innerText = data.message;
+        });
+
+        socket.on("message", function(data) {
+            var chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<p><b>${data.name}:</b> ${data.message}</p>`;
+        });
+
+        function sendMessage() {
+            var message = document.getElementById("chat-message").value;
+            socket.emit("message", { message: message });
+            document.getElementById("chat-message").value = "";
+        }
+    </script>
+</body>
+</html>
