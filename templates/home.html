@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="POST">
+    <div class="container text-center mt-5">
+        <h3>Choose an Option</h3>
+        <div class="mt-4">
+            <input type="text" placeholder="pick a name!" name="name"/>
+            <button type="submit" name="play" value="true" class="btn btn-success btn-lg">Play</button>
+            <button type="submit" name="spectate" value="true" class="btn btn-primary btn-lg">Spectate</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
