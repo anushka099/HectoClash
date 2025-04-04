@@ -14,9 +14,9 @@ def generate_unique_code(length=4):
         code = "".join(random.choice(ascii_uppercase) for _ in range(length))
         if code not in rooms:
             return code
-#correct logic in game.py
+
 def msg():
-    return random.randint(100000, 999999)
+    return random.randint(100000, 999999)  # Generates a random 6-digit number
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -64,6 +64,7 @@ def room():
 
     return render_template("room.html", code=room, messages=rooms[room]["messages"], players=rooms[room]["members"])
 
+# WebSocket Event Handlers
 @socketio.on("connect")
 def handle_connect():
     room = session.get("room")
@@ -72,6 +73,7 @@ def handle_connect():
         join_room(room)
         emit("update_players", {"players": rooms[room]["members"]}, room=room)
         
+        # Start timer if two players are in the room
         if len(rooms[room]["members"]) == 2 and not rooms[room]["timer_started"]:
             rooms[room]["timer_started"] = True
             socketio.start_background_task(start_timer, room)
@@ -81,26 +83,28 @@ def handle_message(data):
     room = session.get("room")
     
     if room in rooms:
+        # Ignore messages if the game hasn't started
         if not rooms[room].get("game_started", False):
-            return 
+            return  # Do nothing if the game is not started yet
         
-        result = check(data["message"])
-        emit("message", {"name": session["name"], "message": result}, room=room)
+        result = check(data["message"])  # Process message using check function
+        emit("message", {"name": session["name"], "message": result}, room=room)  # Send processed result
 
 def start_timer(room):
-    for i in range(10, 0, -1):
+    for i in range(10, 0, -1):  # 10-second countdown
         socketio.emit("update_timer", {"time": i}, room=room)
         time.sleep(1)
     
-    secret_number = msg()
-    rooms[room]["game_started"] = True
+    secret_number = msg()  # Generate a random 6-digit number
+    rooms[room]["game_started"] = True  # Mark game as started
     socketio.emit("game_start", {"message": f"Game Started! Your secret code: {secret_number}"}, room=room)
-#ADD LOGIC(in game.py)    
-def check(message):
-    if message.isdigit():
-        return f"Valid"
-    else:
-        return "Invalid"
 
+    
+def check(message):
+    # Implement your custom game logic here
+    if message.isdigit():
+        return f"Valid number received: {message}"
+    else:
+        return "Invalid input! Please enter a number."
 if __name__ == "__main__":
     socketio.run(app, debug=True)
